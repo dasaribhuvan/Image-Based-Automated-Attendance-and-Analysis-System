@@ -74,10 +74,10 @@ export default function AdminDashboard() {
   }
 
 
-  const handleLogout = () => {
-    localStorage.removeItem("admin_token");
-    navigate("/admin/login");
-  };
+ const handleLogout = () => {
+  localStorage.removeItem("admin_token");
+  navigate("/", { replace: true });
+};
 
 async function rejectTeacher(id){
 
