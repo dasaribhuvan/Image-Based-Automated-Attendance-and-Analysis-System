@@ -4,7 +4,7 @@ uvicorn[standard]
 sqlalchemy
 
 # ------------------- Database -------------------
-psycopg[binary]
+psycopg2-binary
 
 # ------------------- Request Handling -------------------
 python-multipart
@@ -18,7 +18,7 @@ python-jose[cryptography]
 
 # ------------------- ML / Face Recognition -------------------
 numpy
-opencv-python
+opencv-python-headless
 scikit-learn
 insightface
 onnxruntime
@@ -34,3 +34,7 @@ typing-extensions
 
 # ------------------- PDF Generation -------------------
 reportlab
+
+
+
+gunicorn
