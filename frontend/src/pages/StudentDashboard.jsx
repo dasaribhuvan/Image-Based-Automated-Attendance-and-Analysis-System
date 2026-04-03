@@ -20,7 +20,8 @@ export default function StudentDashboard(){
     fetchSummary()
     fetchRecent()
 
-    const ws = new WebSocket("ws://127.0.0.1:8000/ws/attendance")
+    const ws = new WebSocket(
+  `${import.meta.env.VITE_API_URL.replace("https","wss")}/ws/attendance`)
 
     ws.onmessage = (event)=>{
       const data = JSON.parse(event.data)

@@ -29,7 +29,8 @@ export default function StudentClasses(){
 
     fetchAttendance()
 
-    const ws = new WebSocket("ws://127.0.0.1:8000/ws/attendance")
+    const ws = new WebSocket(
+  `${import.meta.env.VITE_API_URL.replace("https","wss")}/ws/attendance`)
 
     ws.onmessage = ()=>{
       fetchAttendance()
