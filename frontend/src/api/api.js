@@ -1,19 +1,19 @@
-  import axios from "axios"
+import axios from "axios"
 
-  const API = axios.create({
-    baseURL: "https://image-based-automated-and-analysis-system-production.up.railway.app"
-  })
+const API = axios.create({
+  baseURL: import.meta.env.VITE_API_URL
+})
 
-  API.interceptors.request.use((config) => {
+API.interceptors.request.use((config) => {
 
-    const token = localStorage.getItem("token")
+  const token = localStorage.getItem("token")
 
-    if(token){
-      config.headers = config.headers || {}
-      config.headers.Authorization = `Bearer ${token}`
-    }
+  if(token){
+    config.headers = config.headers || {}
+    config.headers.Authorization = `Bearer ${token}`
+  }
 
-    return config
-  })
+  return config
+})
 
-  export default API
+export default API
