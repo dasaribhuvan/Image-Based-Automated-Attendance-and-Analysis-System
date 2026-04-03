@@ -1,14 +1,14 @@
-from fastapi import APIRouter, Body, Depends
+
+from fastapi import APIRouter, Body, Depends, HTTPException
 from sqlalchemy.orm import Session
-from database.db import SessionLocal
-from database.models import Attendance , Student
+from database.models import Attendance, Embedding , Student
 from sqlalchemy import func, extract
 from websocket_manager import manager
 from datetime import date
 import json
 from datetime import datetime
 from database.db import SessionLocal
-from database.models import Attendance, Timetable
+from database.models import Timetable
 from utils.auth import get_current_student
 
 
@@ -315,30 +315,81 @@ def subject(
 
 
 from fastapi import APIRouter, UploadFile, File, Form
-from recognition.group_attendance import process_group_images
+
 
 
 
 from typing import List
 from fastapi import UploadFile, File
 
+import requests
+import os
+
+FACE_API = os.getenv("FACE_API_URL")
+
+if not FACE_API:
+    raise Exception("FACE_API_URL not configured")
+
 @router.post("/detect-faces")
 async def detect_faces(
-    images: List[UploadFile] = File(...)
+    images: List[UploadFile] = File(...),
+    db: Session = Depends(get_db)
 ):
-    image_list = []
 
-    # Read all uploaded images
+    # Load embeddings from DB
+    records = db.query(Embedding).all()
+
+    embeddings = {}
+
+    for r in records:
+        embeddings[r.student_id] = json.loads(r.embedding_vector)
+    print("Embeddings:", len(embeddings))
+
+    files = []
+
     for image in images:
         contents = await image.read()
-        image_list.append(contents)
+        files.append(
+            ("images", (image.filename, contents, image.content_type))
+        )
 
-    # Process multiple images
-    attendance = process_group_images(image_list)
+    response = requests.post(
+        f"{FACE_API}/detect",
+        files=files,
+        data={
+            "embeddings": json.dumps(embeddings)
+        },
+        timeout=60
+    )
 
-    return {
-        "recognized_students": attendance
-    }
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=500,
+            detail="Face recognition service failed"
+    )
+
+    result = response.json()
+    recognized = result.get("recognized", {})
+
+    students = db.query(Student).all()
+
+    attendance = []
+
+    for student in students:
+
+        if str(student.id) in recognized or student.id in recognized:
+            status = "Present"
+        else:
+            status = "Absent"
+
+        attendance.append({
+            "student_id": student.id,
+            "roll_no": student.roll_no,
+            "name": student.name,
+            "status": status
+        })
+
+    return attendance
 
 
 from datetime import date

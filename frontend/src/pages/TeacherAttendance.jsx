@@ -74,7 +74,7 @@ images.forEach(file=>{
 
 const res = await API.post("/detect-faces",formData)
 
-const detected = res.data.recognized_students || []
+const detected = res.data || []
 
 const updated = detected.map(s=>({
 student_id:s.student_id,

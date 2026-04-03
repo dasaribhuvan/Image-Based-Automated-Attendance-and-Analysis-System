@@ -5,7 +5,7 @@ from database.db import SessionLocal
 from database.models import Student, Embedding
 from passlib.context import CryptContext
 from utils.auth import create_access_token, verify_token
-from recognition.arcface_embeddings import generate_embedding_from_images
+
 from database.models import OTP
 
 from typing import List
@@ -221,7 +221,26 @@ async def register_complete(
         # =========================
         # GENERATE EMBEDDING
         # =========================
-        embedding = generate_embedding_from_images(good_images)
+        import requests
+        import os
+
+        FACE_API = os.getenv("FACE_API_URL")
+
+        files = []
+
+        for img in good_images:
+            files.append(
+                ("images", ("image.jpg", img, "image/jpeg"))
+            )
+
+        response = requests.post(
+            f"{FACE_API}/generate-embedding",
+            files=files,
+            timeout=60
+        )
+
+        embedding = response.json().get("embedding")
+
         if embedding is None:
             raise HTTPException(
                 status_code=400,

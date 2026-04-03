@@ -14,12 +14,9 @@ from routes.admin_routes import router as admin_router
 import os
 from dotenv import load_dotenv
 from passlib.context import CryptContext
-from recognition.model_loader import get_face_app
 
 
-# -------------------------
 # LOAD ENV
-# -------------------------
 load_dotenv()
 
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
@@ -28,7 +25,6 @@ ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 if not ADMIN_EMAIL or not ADMIN_PASSWORD:
     raise Exception("Admin credentials missing in .env")
 
-
 pwd_context = CryptContext(
     schemes=["bcrypt"],
     deprecated="auto"
@@ -36,22 +32,12 @@ pwd_context = CryptContext(
 
 app = FastAPI()
 
-@app.on_event("startup")
-def load_model():
-    print("Loading face model at startup...")
-    get_face_app()
-    print("Model ready")
 
-
-# -------------------------
 # CREATE TABLES
-# -------------------------
 Base.metadata.create_all(bind=engine)
 
 
-# -------------------------
-# CREATE / UPDATE ADMIN
-# -------------------------
+# CREATE ADMIN
 def create_admin():
 
     db = SessionLocal()
@@ -82,32 +68,22 @@ def create_admin():
         db.close()
 
 
-# -------------------------
-# STARTUP EVENT
-# -------------------------
 @app.on_event("startup")
 def startup():
     create_admin()
 
 
-# -------------------------
 # CORS
-# -------------------------
-# -------------------------
-# CORS
-# -------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],   # allow all (temporary)
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
-# -------------------------
 # ROUTERS
-# -------------------------
 app.include_router(student_router)
 app.include_router(teacher_router)
 app.include_router(attendance_router)
@@ -116,12 +92,10 @@ app.include_router(otp_router)
 app.include_router(admin_router)
 
 
-# -------------------------
-# ROOT
-# -------------------------
 @app.get("/")
 def home():
     return {"message": "API running"}
+
 
 @app.get("/health")
 def health():
