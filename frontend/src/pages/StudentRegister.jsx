@@ -23,6 +23,34 @@ export default function StudentRegister() {
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
+  const [timer, setTimer] = useState(30)
+const [canResend, setCanResend] = useState(false)
+
+useEffect(()=>{
+
+if(otpSent && timer > 0){
+
+const interval = setInterval(()=>{
+
+setTimer(prev=>{
+
+if(prev <= 1){
+clearInterval(interval)
+setCanResend(true)
+return 0
+}
+
+return prev - 1
+
+})
+
+},1000)
+
+return ()=>clearInterval(interval)
+
+}
+
+},[otpSent, timer])
 
   const MAX_IMAGES = 5;
 
@@ -32,6 +60,8 @@ export default function StudentRegister() {
       setImages(prev => [...prev, imageSrc]);
     }
   };
+
+
 
   const startScan = () => {
     setImages([]);
@@ -93,6 +123,30 @@ async function verifyOtp() {
   } catch (err) {
     toast.error("Invalid OTP");
   }
+}
+
+async function resendOtp(){
+
+try{
+
+await API.post("/send-otp", null, {
+params:{
+email,
+role:"student"
+}
+})
+
+toast.success("OTP resent")
+
+setTimer(30)
+setCanResend(false)
+
+}catch(err){
+
+toast.error("Resend failed")
+
+}
+
 }
 
   async function registerStudent() {
@@ -191,26 +245,39 @@ async function verifyOtp() {
                 Send OTP
               </button>
             )}
+          {otpSent && !otpVerified && (
 
-            {otpSent && !otpVerified && (
-  <div className="flex gap-2">
+        <div className="flex flex-col gap-2">
 
-    <input
-      placeholder="Enter OTP"
-      value={otp}
-      onChange={(e) => setOtp(e.target.value)}
-      className="p-2 rounded-lg bg-white/10 border border-white/20"
-    />
+        <div className="flex gap-2">
 
-    <button
-      onClick={verifyOtp}
-      className="bg-green-500 px-3 rounded-lg"
-    >
-      Verify
-    </button>
+        <input
+        placeholder="Enter OTP"
+        value={otp}
+        onChange={(e)=>setOtp(e.target.value)}
+        className="p-2 rounded-lg bg-white/10 border border-white/20"
+        />
 
-  </div>
-)}
+        <button
+        onClick={verifyOtp}
+        className="bg-green-500 px-3 rounded-lg"
+        >
+        Verify
+        </button>
+
+        </div>
+
+        <button
+        onClick={resendOtp}
+        disabled={!canResend}
+        className="text-xs text-cyan-400 disabled:text-gray-500"
+        >
+        {canResend ? "Resend OTP" : `Resend in ${timer}s`}
+        </button>
+
+        </div>
+
+        )}
 
           <input
             type="password"

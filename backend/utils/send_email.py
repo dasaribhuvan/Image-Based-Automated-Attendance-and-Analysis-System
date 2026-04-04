@@ -1,51 +1,51 @@
-import smtplib
 import os
 from dotenv import load_dotenv
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import sib_api_v3_sdk
+from sib_api_v3_sdk.rest import ApiException
 
 load_dotenv()
 
-EMAIL = os.getenv("EMAIL")
-PASSWORD = os.getenv("EMAIL_PASSWORD")
+BREVO_API_KEY = os.getenv("BREVO_API_KEY")
 
 
 def send_otp_email(to_email, otp):
 
+    configuration = sib_api_v3_sdk.Configuration()
+    configuration.api_key['api-key'] = BREVO_API_KEY
+
+    api_instance = sib_api_v3_sdk.TransactionalEmailsApi(
+        sib_api_v3_sdk.ApiClient(configuration)
+    )
+
     subject = "Face Attendance OTP Verification"
 
-    body = f"""
-Hello,
+    html_content = f"""
+    <html>
+    <body>
+        <h3>Face Attendance Registration</h3>
+        <p>Your OTP is:</p>
+        <h2>{otp}</h2>
+        <p>This OTP is valid for 5 minutes.</p>
+        <p>Do not share this OTP with anyone.</p>
+        <br>
+        <p>Face Attendance System</p>
+    </body>
+    </html>
+    """
 
-Your OTP for Face Attendance Registration is:
-
-{otp}
-
-This OTP is valid for 5 minutes.
-
-Do not share this OTP with anyone.
-
-Face Attendance System
-"""
-
-    msg = MIMEMultipart()
-    msg["From"] = EMAIL
-    msg["To"] = to_email
-    msg["Subject"] = subject
-
-    msg.attach(MIMEText(body, "plain"))
+    send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
+        to=[{"email": to_email}],
+        sender={
+            "name": "Face Attendance",
+            "email": "admin.mlrit@gmail.com"
+        },
+        subject=subject,
+        html_content=html_content
+    )
 
     try:
-        server = smtplib.SMTP("smtp.gmail.com", 587)
-        server.starttls()
-        server.login(EMAIL, PASSWORD)
-
-        text = msg.as_string()
-        server.sendmail(EMAIL, to_email, text)
-
-        server.quit()
-
+        api_instance.send_transac_email(send_smtp_email)
         print("OTP email sent successfully")
 
-    except Exception as e:
+    except ApiException as e:
         print("Error sending email:", e)

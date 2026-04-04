@@ -16,8 +16,36 @@ export default function TeacherRegister() {
 
   const [status, setStatus] = useState("register");
   const [loading, setLoading] = useState(false);
+  const [timer, setTimer] = useState(30)
+const [canResend, setCanResend] = useState(false)
 
   // Check status when user revisits
+
+  useEffect(() => {
+
+if(status === "otp" && timer > 0){
+
+const interval = setInterval(()=>{
+
+setTimer(prev => {
+
+if(prev <= 1){
+clearInterval(interval)
+setCanResend(true)
+return 0
+}
+
+return prev - 1
+
+})
+
+},1000)
+
+return ()=>clearInterval(interval)
+
+}
+
+},[status, timer])
  
 
 
@@ -153,6 +181,30 @@ toast.error("Invalid OTP")
 
   }
 
+  async function resendOTP(){
+
+try{
+
+await API.post("/send-otp",null,{
+params:{
+email,
+role:"teacher"
+}
+})
+
+toast.success("OTP Resent")
+
+setTimer(30)
+setCanResend(false)
+
+}catch(err){
+
+toast.error("Failed to resend OTP")
+
+}
+
+}
+
 
 
   return (
@@ -231,27 +283,39 @@ toast.error("Invalid OTP")
         {/* OTP */}
         {status==="otp" && (
 
-        <>
+<>
 
-        <input
-          placeholder="Enter OTP"
-          value={otp}
-          onChange={(e)=>setOtp(e.target.value)}
-          className="p-3 rounded-lg bg-white/10 border border-white/20"
-        />
+<input
+placeholder="Enter OTP"
+value={otp}
+onChange={(e)=>setOtp(e.target.value)}
+className="p-3 rounded-lg bg-white/10 border border-white/20"
+/>
 
-        <motion.button
-          whileHover={{scale:1.05}}
-          whileTap={{scale:0.95}}
-          onClick={verifyOTP}
-          className="bg-indigo-600 p-3 rounded-lg"
-        >
-          Verify OTP
-        </motion.button>
+<motion.button
+whileHover={{scale:1.05}}
+whileTap={{scale:0.95}}
+onClick={verifyOTP}
+className="bg-indigo-600 p-3 rounded-lg"
+>
+Verify OTP
+</motion.button>
 
-        </>
+<div className="text-center mt-2">
 
-        )}
+<button
+onClick={resendOTP}
+disabled={!canResend}
+className="text-sm text-cyan-400 disabled:text-gray-500"
+>
+{canResend ? "Resend OTP" : `Resend in ${timer}s`}
+</button>
+
+</div>
+
+</>
+
+)}
 
 
 

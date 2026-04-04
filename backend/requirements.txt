@@ -39,3 +39,4 @@ reportlab
 
 gunicorn
 onnx
+sib-api-v3-sdk
