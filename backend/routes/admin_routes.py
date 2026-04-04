@@ -54,16 +54,17 @@ def admin_login(
     print("ENV EMAIL:", ADMIN_EMAIL)
     print("DB ADMIN:", admin.email if admin else "None")
 
-    if not admin:
+    if not admin or not admin.password:
         raise HTTPException(
             status_code=401,
             detail="Invalid credentials"
-        )
+    )
 
-    if not pwd_context.verify(
-        password,
-        admin.password
-    ):
+    if not pwd_context.verify(password, admin.password):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid credentials"
+    )
         raise HTTPException(
             status_code=401,
             detail="Invalid credentials"
@@ -160,28 +161,4 @@ def all_teachers(db: Session = Depends(get_db)):
     return teachers
 
 
-@router.post("/admin/reject/{teacher_id}")
-def reject_teacher(
-    teacher_id: int,
-    db: Session = Depends(get_db)
-):
-
-    teacher = db.query(Teacher).filter(
-        Teacher.id == teacher_id
-    ).first()
-
-    if not teacher:
-        raise HTTPException(
-            404,
-            "Teacher not found"
-        )
-
-    teacher.rejected = True
-    teacher.approved = False
-
-    db.commit()
-
-    return {
-        "message": "Teacher rejected"
-    }
 
