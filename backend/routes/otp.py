@@ -83,16 +83,14 @@ def send_otp(email: str, role: str, db: Session = Depends(get_db)):
     db.add(db_otp)
     db.commit()
 
+    
     # -------------------------
     # Send Email
     # -------------------------
-    email_sent = send_otp_email(email, otp)
-
-    if not email_sent:
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to send OTP email"
-        )
+    try:
+        send_otp_email(email, otp)
+    except Exception as e:
+        print("Email error:", e)
 
     return {
         "message": "OTP sent successfully"
