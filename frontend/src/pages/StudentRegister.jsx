@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Webcam from "react-webcam";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
