@@ -53,18 +53,20 @@ def admin_login(
     print("LOGIN EMAIL:", email)
     print("ENV EMAIL:", ADMIN_EMAIL)
     print("DB ADMIN:", admin.email if admin else "None")
+    print("DB PASSWORD:", admin.password if admin else None)
 
     if not admin or not admin.password:
+        print("ADMIN NOT FOUND OR PASSWORD EMPTY")
         raise HTTPException(
-            status_code=401,
-            detail="Invalid credentials"
-    )
+        status_code=401,
+        detail="Invalid credentials"
+        )
 
-    if not pwd_context.verify(password, admin.password):
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid credentials"
-    )
+    is_valid = pwd_context.verify(password, admin.password)
+
+    print("VERIFY RESULT:", is_valid)
+
+    if not is_valid:
         raise HTTPException(
             status_code=401,
             detail="Invalid credentials"
