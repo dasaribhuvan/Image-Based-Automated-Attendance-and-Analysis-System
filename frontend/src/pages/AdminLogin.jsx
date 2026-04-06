@@ -30,9 +30,9 @@ export default function AdminLogin() {
     navigate("/admin/dashboard");
 
   } catch (err) {
-    console.log("LOGIN ERROR:", err)
-    alert("Invalid admin credentials");
-  }
+  console.log("ERROR:", err.response?.data);
+  alert(err.response?.data?.detail || "Login failed");
+}
 
 };
 
