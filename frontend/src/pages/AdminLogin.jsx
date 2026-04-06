@@ -13,25 +13,28 @@ export default function AdminLogin() {
 
   const handleLogin = async () => {
 
-    try {
+  try {
 
-      const res = await axios.post(
-  `${import.meta.env.VITE_API_URL}/admin/login`,
-  {
-    email,
-    password
+    console.log("API URL:", import.meta.env.VITE_API_URL)
+
+    const res = await axios.post(
+      `${import.meta.env.VITE_API_URL}/admin/login`,
+      {
+        email,
+        password
+      }
+    );
+
+    localStorage.setItem("admin_token", res.data.access_token);
+
+    navigate("/admin/dashboard");
+
+  } catch (err) {
+    console.log("LOGIN ERROR:", err)
+    alert("Invalid admin credentials");
   }
-);
 
-      localStorage.setItem("admin_token", res.data.access_token);
-
-      navigate("/admin/dashboard");
-
-    } catch (err) {
-      alert("Invalid admin credentials");
-    }
-
-  };
+};
 
   return (
 
