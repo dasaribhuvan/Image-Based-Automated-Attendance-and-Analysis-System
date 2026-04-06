@@ -16,12 +16,12 @@ export default function AdminLogin() {
     try {
 
       const res = await axios.post(
-        "http://localhost:8000/admin/login",
-        {
-          email,
-          password
-        }
-      );
+  `${import.meta.env.VITE_API_URL}/admin/login`,
+  {
+    email,
+    password
+  }
+);
 
       localStorage.setItem("admin_token", res.data.access_token);
 
