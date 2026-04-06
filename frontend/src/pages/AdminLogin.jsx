@@ -18,7 +18,7 @@ export default function AdminLogin() {
     console.log("API URL:", import.meta.env.VITE_API_URL)
 
     const res = await axios.post(
-      `${import.meta.env.VITE_API_URL}/admin/login`,
+  "https://image-based-automated-and-analysis-system-production.up.railway.app/admin/login",
       {
         email,
         password
